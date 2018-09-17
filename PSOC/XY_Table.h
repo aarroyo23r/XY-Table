@@ -15,8 +15,8 @@
 #define Test
 
 //PWM values
-#define PWM_X_Value             255
-#define PWM_Y_Value             255
+#define PWM_X_Value             200
+#define PWM_Y_Value             200
 
 //#if defined (__GNUC__)
     /* Add an explicit reference to the floating point printf library */
@@ -31,6 +31,8 @@
 
 #define USBUART_BUFFER_SIZE (64u)
 #define LINE_STR_LENGTH     (20u)
+
+int pulseWidth=1000;
 
 
 //Functions___________________________________________________________________________________________________________
@@ -90,7 +92,7 @@ void UART_Send2Host ( uint16 CX, uint16 CY,uint8 InterruptCnt,int in,uint8 *buff
 int test(uint16 InterruptCnt ){
     int run=1;
     Timer_1_Start();
-        if (InterruptCnt == 7){//Test finished
+        if (InterruptCnt == (4*pulseWidth)){//Test finished
             LCD_Position(0u, 0u);
             LCD_PrintString("Test completed  ");
             PWM_X_WriteCompare(0);
@@ -105,24 +107,25 @@ int test(uint16 InterruptCnt ){
                 LCD_PrintString("Start Pulse 1");
                 PWM_X_WriteCompare(PWM_X_Value);
             } 
-            else if (InterruptCnt == 2){//Finish First pulse 
+            else if (InterruptCnt == pulseWidth){//Finish First pulse 
                 LCD_Position(0u, 0u);
                 LCD_PrintString("Finish Pulse 1");
                 PWM_X_WriteCompare(0);
             }
-            else if (InterruptCnt == 4){//Start second pulse   
+            else if (InterruptCnt == 2*pulseWidth){//Start second pulse   
                 LCD_Position(0u, 0u);
                 LCD_PrintString("Start Pulse 2");
                 PWM_X_WriteCompare(PWM_X_Value); 
             
             }
-            else if (InterruptCnt == 6){//Finish second pulse 
+            else if (InterruptCnt == 3*pulseWidth){//Finish second pulse 
                 LCD_Position(0u, 0u);
                 LCD_PrintString("Finish Pulse 2");
                 LCD_PrintInt16(InterruptCnt);
                 PWM_X_WriteCompare(0); 
             
             }
+            
             return run=1;
             
         }    
@@ -130,23 +133,23 @@ int test(uint16 InterruptCnt ){
 
 int pulseDetect(uint16 InterruptCnt){
     int in=5;
-        if (InterruptCnt == 7){//Test finished
+        if (InterruptCnt == (3*pulseWidth+1)){//Test finished
             return in=0;
             
         }
         else{
-            if (InterruptCnt >= 6){//Start First pulse 
+            if (InterruptCnt >= 3*pulseWidth){//Start First pulse 
                 return in=0;
             } 
-            else if (InterruptCnt >= 4){//Finish First pulse 
-                return in=5;
+            else if (InterruptCnt >= 2*pulseWidth){//Finish First pulse 
+                return in=12;
             }
-            else if (InterruptCnt >= 2){//Start second pulse   
+            else if (InterruptCnt >= pulseWidth){//Start second pulse   
                 return in=0; 
             
             }
             else if (InterruptCnt >= 0){//Finish second pulse 
-                return in=5; 
+                return in=12; 
             
             }
             else{
