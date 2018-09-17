@@ -1,10 +1,10 @@
 
 #include <project.h>
 #include "stdio.h"    
-#include "functions.h"
+#include "XY_Table.h"
 
 uint16 InterruptCnt;
-
+int flag=0;
 /*******************************************************************************
 * Define Interrupt service routine and allocate an vector to the Interrupt
 ********************************************************************************/
@@ -16,11 +16,13 @@ CY_ISR(InterruptHandler)
 	 */
    	Timer_1_STATUS;
     
+    
 	/* Increment the Counter to indicate the keep track of the number of 
      * interrupts received */
-    InterruptCnt++;    
+    flag=1;
+    InterruptCnt++;  
+    //flag=!flag;
 }
-
 
 int main()
 {
@@ -40,6 +42,7 @@ int main()
     //Axis counters
     uint32 CuentaX;
     uint32 CuentaY;
+    
     
     
     #if (CY_PSOC3 || CY_PSOC5LP)
@@ -66,6 +69,7 @@ int main()
     #endif
 
 
+    PWM_X_WriteCompare(0);
     
     //Wait the push button for Activate Loop
      while(!run){
@@ -76,25 +80,38 @@ int main()
 
     while(run)
     {
-        //Counters
+        
+                   
+        
+        
+        
+        //Test______________________________________________________________________________________________________
+        #ifdef Test 
+        
+        
+        
+        
+        
+        if ( flag ){
+            
+          LCD_Position(1u, 0u);
+          LCD_PrintInt16(InterruptCnt/1000);
+            //Counters
          CuentaY = Quad_Y_GetCounter();
          float CY = (CuentaY/64)*0.6;
        
          CuentaX = Quad_X_GetCounter();       
          float CX = (CuentaX/64)*0.6;
-                   
+            
+            in=pulseDetect(InterruptCnt);
+            run=test(InterruptCnt);
+            
+            ///UART______________________________________________________________________________________________________
+            UART_Send2Host(CX,CY,InterruptCnt,in,buffer,count);
+        }
         
-        //UART______________________________________________________________________________________________________
-        UART_Send2Host(CX,CY,InterruptCnt,in,buffer,count);
+        flag=0;
         
-        //Test______________________________________________________________________________________________________
-        #ifdef Test 
-        
-        LCD_Position(1u, 0u);
-        LCD_PrintInt16(InterruptCnt);
-        
-        in=pulseDetect(InterruptCnt);
-        run=test(InterruptCnt);
         #endif     
     }
     
